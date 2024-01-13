@@ -12,7 +12,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func main()  {
+func main() {
 	godotenv.Load()
 
 	sess, err := discordgo.New("Bot " + os.Getenv("TOKEN"))
@@ -28,6 +28,13 @@ func main()  {
 
 		if strings.HasPrefix(m.Content, "https://twitter.com") || strings.HasPrefix(m.Content, "https://x.com") {
 			s.ChannelMessageDelete(m.ChannelID, m.Reference().MessageID)
+
+			sentMessage := strings.Fields(m.Content)
+			var originalUrl string
+			if len(sentMessage) > 0 {
+				originalUrl = sentMessage[0]
+			}
+
 			var newUrl string
 			if strings.Contains(m.Content, "twitter.com") {
 				newUrl = strings.Replace(m.Content, "twitter.com", "fxtwitter.com", 1)
@@ -35,7 +42,24 @@ func main()  {
 				newUrl = strings.Replace(m.Content, "x.com", "fxtwitter.com", 1)
 			}
 
-			s.ChannelMessageSend(m.ChannelID, "**Shared By** <@" + m.Author.ID + "> " + newUrl)
+			button := &discordgo.Button{
+				Emoji: discordgo.ComponentEmoji{
+					Name: "📱",
+				},
+				Style: discordgo.LinkButton,
+				URL:   originalUrl,
+			}
+
+			actionRow := &discordgo.ActionsRow{
+				Components: []discordgo.MessageComponent{button},
+			}
+
+			messageSend := &discordgo.MessageSend{
+				Content:    "**Shared By** <@" + m.Author.ID + "> " + newUrl,
+				Components: []discordgo.MessageComponent{actionRow},
+			}
+
+			s.ChannelMessageSendComplex(m.ChannelID, messageSend)
 		}
 	})
 

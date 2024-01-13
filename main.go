@@ -15,7 +15,7 @@ import (
 func main() {
 	godotenv.Load()
 
-	sess, err := discordgo.New("Bot " + os.Getenv("TOKEN"))
+	sess, err := discordgo.New("Bot " + os.Getenv("TOKEN_TEST"))
 
 	if err != nil {
 		log.Fatal(err)
